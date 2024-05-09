@@ -1,1 +1,5 @@
 .vscode/
+
+migrations/*
+
+create-user.json
