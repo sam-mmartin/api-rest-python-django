@@ -39,3 +39,28 @@ class UserSerializer(serializers.ModelSerializer):
             UserSocialMedia.objects.create(user=user, social=new_social)
 
         return user
+
+    def update(self, instance: User, validated_data):
+        socials_data = validated_data.pop('socials_medias')
+        socials_data = attemp_json_deserialize(socials_data, expect_type=list)
+
+        for social in socials_data:
+            try:
+                obj = UserSocialMedia.objects.filter(
+                    social__name=social['name']).filter(
+                        social__username=social['username'])
+
+                if obj.count() == 0:
+                    social_objs = Social.objects.filter(
+                        name=social['name']).filter(
+                            username=social['username'])
+
+                    if social_objs.count() == 0:
+                        new_social = Social.objects.create(**social)
+                        UserSocialMedia.objects.create(user=instance, social=new_social)
+            except:
+                pass
+
+        instance.save()
+
+        return instance
